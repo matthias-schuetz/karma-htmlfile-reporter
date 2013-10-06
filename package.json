@@ -1,0 +1,36 @@
+{
+  "name": "karma-htmlfile-reporter",
+  "version": "0.1.0",
+  "description": "A Karma plugin. Report results in styled html format.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/matthias-schuetz/karma-htmlfile-reporter.git"
+  },
+  "keywords": [
+    "karma-plugin",
+    "karma-reporter",
+    "html"
+  ],
+  "author": {
+    "name": "Matthias Schuetz",
+    "email": "MatthiasSchuetz@gmx.de"
+  },
+  "dependencies": {
+    "xmlbuilder": "0.4.2"
+  },
+  "peerDependencies": {
+    "karma": ">=0.9"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-npm": "~0.0.2",
+    "grunt-bump": "~0.0.7",
+    "grunt-auto-release": "~0.0.2"
+  },
+  "contributors": []
+}
