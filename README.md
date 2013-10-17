@@ -32,6 +32,10 @@ npm install karma-htmlfile-reporter --save-dev
 // karma.conf.js
 module.exports = function(config) {
   config.set({
+    plugins : [
+	  'karma-htmlfile-reporter'
+    ],
+
     reporters: ['progress', 'html'],
 
     htmlReporter: {
