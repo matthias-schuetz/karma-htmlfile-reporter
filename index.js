@@ -51,28 +51,23 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     suites = {};
     html = builder.create('html', null, 'html');
     html.documentObject.children.shift();
-  
+  };
+
+  this.onBrowserStart = function (browser){
     var suite;
     var header;
     var timestamp = (new Date()).toISOString().substr(0, 19);
-
     htmlHelpers.createHead();
     htmlHelpers.createBody();
-  
-    browsers.forEach(function(browser) {
-      suite = suites[browser.id] = body.ele('table', {cellspacing:'0', cellpadding:'0', border:'0'});
-    
-      suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3', title:browser.fullName}, 'Browser: ' + browser.name);
-      suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3'}, 'Timestamp: ' + timestamp);
-      suites[browser.id]['results'] = suite.ele('tr').ele('td', {colspan:'3'});
-    
-      header = suite.ele('tr', {class:'header'});
-      header.ele('td', {}, 'Status');
-      header.ele('td', {}, 'Spec');
-      header.ele('td', {}, 'Suite / Results');
-    
-      body.ele('hr');
-    });
+    suite = suites[browser.id] = body.ele('table', {cellspacing:'0', cellpadding:'0', border:'0'});
+    suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3', title:browser.fullName}, 'Browser: ' + browser.name);
+    suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3'}, 'Timestamp: ' + timestamp);
+    suites[browser.id]['results'] = suite.ele('tr').ele('td', {colspan:'3'});
+    header = suite.ele('tr', {class:'header'});
+    header.ele('td', {}, 'Status');
+    header.ele('td', {}, 'Spec');
+    header.ele('td', {}, 'Suite / Results');
+    body.ele('hr');
   };
 
   this.onBrowserComplete = function(browser) {
