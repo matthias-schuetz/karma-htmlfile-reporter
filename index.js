@@ -155,5 +155,5 @@ HTMLReporter.$inject = ['baseReporterDecorator', 'config', 'emitter', 'logger', 
 
 // PUBLISH DI MODULE
 module.exports = {
-  'reporter:html': ['type', HTMLReporter]
+	'reporter:html': ['type', HTMLReporter]
 };

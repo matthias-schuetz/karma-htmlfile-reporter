@@ -20,10 +20,10 @@
     "email": "MatthiasSchuetz@gmx.de"
   },
   "dependencies": {
-    "xmlbuilder": "0.4.2"
+    "xmlbuilder": "2.4.4"
   },
   "peerDependencies": {
-    "karma": ">=0.11"
+    "karma": ">=0.10"
   },
   "license": "MIT",
   "devDependencies": {
