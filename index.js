@@ -56,8 +56,8 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   this.onRunStart = function(browsers) {
     suites = {};
 
-    html = builder.create('html', null, 'html');
-    html.documentObject.children.shift();
+    html = builder.create('html', null, 'html', { headless: true });
+    html.doctype();
 
     htmlHelpers.createHead();
     htmlHelpers.createBody();
