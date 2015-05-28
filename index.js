@@ -5,6 +5,8 @@ var builder = require('xmlbuilder');
 
 var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, helper, formatError) {
   var outputFile = config.htmlReporter.outputFile;
+  var pageTitle = config.htmlReporter.pageTitle || 'Unit Test Results';
+  var subPageTitle = config.htmlReporter.subPageTitle || false;
   var log = logger.create('reporter.html');
  
   var html;
@@ -34,12 +36,16 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     createHead: function() {
       var head = html.ele('head');
       head.ele('meta', {charset: 'utf-8'});
-      head.ele('title', {}, 'Unit Test Results');
-      head.ele('style', {type: 'text/css'}, 'html,body{font-family:Arial,sans-serif;margin:0;padding:0;}body{padding:10px 40px;}table{width:100%;margin-bottom:20px;}tr.header{background:#ddd;font-weight:bold;border-bottom:none;}td{padding:7px;border-top:none;border-left:1px black solid;border-bottom:1px black solid;border-right:none;}tr.pass td{color:#003b07;background:#86e191;}tr.skip td{color:#7d3a00;background:#ffd24a;}tr.fail td{color:#5e0e00;background:#ff9c8a;}tr:first-child td{border-top:1px black solid;}td:last-child{border-right:1px black solid;}tr.overview{font-weight:bold;color:#777;}tr.overview td{padding-bottom:0px;border-bottom:none;}tr.system-out td{color:#777;}hr{height:2px;margin:30px 0;background:#000;border:none;}');
+      head.ele('title', {}, pageTitle + (subPageTitle ? ' - ' + subPageTitle : ''));
+      head.ele('style', {type: 'text/css'}, 'html,body{font-family:Arial,sans-serif;margin:0;padding:0;}body{padding:10px 40px;}h1{margin-bottom:0;}h2{margin-top:0;color:#999;}table{width:100%;margin-top:20px;margin-bottom:20px;table-layout:fixed;}tr.header{background:#ddd;font-weight:bold;border-bottom:none;}td{padding:7px;border-top:none;border-left:1px black solid;border-bottom:1px black solid;border-right:none;word-break:break-all;word-wrap:break-word;}tr.pass td{color:#003b07;background:#86e191;}tr.skip td{color:#7d3a00;background:#ffd24a;}tr.fail td{color:#5e0e00;background:#ff9c8a;}tr:first-child td{border-top:1px black solid;}td:last-child{border-right:1px black solid;}tr.overview{font-weight:bold;color:#777;}tr.overview td{padding-bottom:0px;border-bottom:none;}tr.system-out td{color:#777;}hr{height:2px;margin:30px 0;background:#000;border:none;}');
     },
     createBody: function() {
       body = html.ele('body');
-      body.ele('h1', {}, 'Unit Test Results');
+      body.ele('h1', {}, pageTitle);
+			
+      if (subPageTitle) {
+        body.ele('h2', {}, subPageTitle);
+      }
     }
   };
 
@@ -49,24 +55,30 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
   this.onRunStart = function(browsers) {
     suites = {};
+
     html = builder.create('html', null, 'html');
     html.documentObject.children.shift();
+
+    htmlHelpers.createHead();
+    htmlHelpers.createBody();
   };
 
   this.onBrowserStart = function (browser){
     var suite;
     var header;
-    var timestamp = (new Date()).toISOString().substr(0, 19);
-    htmlHelpers.createHead();
-    htmlHelpers.createBody();
+    
+    var timestamp = (new Date()).toLocaleString();
+
     suite = suites[browser.id] = body.ele('table', {cellspacing:'0', cellpadding:'0', border:'0'});
     suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3', title:browser.fullName}, 'Browser: ' + browser.name);
     suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3'}, 'Timestamp: ' + timestamp);
     suites[browser.id]['results'] = suite.ele('tr').ele('td', {colspan:'3'});
+		
     header = suite.ele('tr', {class:'header'});
     header.ele('td', {}, 'Status');
     header.ele('td', {}, 'Spec');
     header.ele('td', {}, 'Suite / Results');
+		
     body.ele('hr');
   };
 
@@ -93,7 +105,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     config.basePath = path.resolve(config.basePath || '.');
     outputFile = basePathResolve(outputFile);
     helper.normalizeWinPath(outputFile);
-
+	
     helper.mkdirIfNotExists(path.dirname(outputFile), function() {
       fs.writeFile(outputFile, htmlToOutput.end({pretty: true}), function(err) {
         if (err) {
@@ -123,7 +135,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
     if (!result.success) {
       result.log.forEach(function(err) {
-        suiteColumn.raw('<br />' + formatError(err));
+        suiteColumn.raw('<br />' + formatError(err).replace(/</g,'&lt;').replace(/>/g,'&gt;'));
       });
     }
   };
@@ -139,8 +151,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   });
 };
 
-HTMLReporter.$inject = ['baseReporterDecorator', 'config', 'emitter', 'logger',
-    'helper', 'formatError'];
+HTMLReporter.$inject = ['baseReporterDecorator', 'config', 'emitter', 'logger', 'helper', 'formatError'];
 
 // PUBLISH DI MODULE
 module.exports = {

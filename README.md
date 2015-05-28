@@ -17,7 +17,7 @@ The easiest way is to keep `karma-htmlfile-reporter` as a devDependency in your 
 {
   "devDependencies": {
     "karma": "~0.10",
-    "karma-htmlfile-reporter": "~0.1"
+    "karma-htmlfile-reporter": "~0.2"
   }
 }
 ```
@@ -32,14 +32,14 @@ npm install karma-htmlfile-reporter --save-dev
 // karma.conf.js
 module.exports = function(config) {
   config.set({
-    plugins : [
-	  'karma-htmlfile-reporter'
-    ],
-
     reporters: ['progress', 'html'],
 
     htmlReporter: {
-      outputFile: 'tests/units.html'
+      outputFile: 'tests/units.html',
+			
+      // Optional
+      pageTitle: 'Unit Tests',
+      subPageTitle: 'A sample project description'
     }
   });
 };
@@ -47,7 +47,7 @@ module.exports = function(config) {
 
 You can pass list of reporters as a CLI argument too:
 ```bash
-karma start --reporters html,dots
+karma start --reporters html
 ```
 
 ----
