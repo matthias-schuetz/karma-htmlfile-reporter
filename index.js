@@ -103,11 +103,11 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       suite['results'].txt(result.failed + ' failures / ');
       suite['results'].txt(result.skipped + ' skipped / ');
       suite['results'].txt('runtime: ' + ((result.netTime || 0) / 1000) + 's');
-	}
-
-    if (allMessages.length > 0) {
+	  
+	  if (allMessages.length > 0) {
         suite.ele('tr', {class:'system-out'}).ele('td', {colspan:'3'}).raw('<strong>System output:</strong><br />' + allMessages.join('<br />'));
-    }
+      }
+	}
   };
 
   this.onRunComplete = function() {
