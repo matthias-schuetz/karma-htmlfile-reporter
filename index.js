@@ -107,7 +107,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       if (allMessages.length > 0) {
         suite.ele('tr', {class:'system-out'}).ele('td', {colspan:'3'}).raw('<strong>System output:</strong><br />' + allMessages.join('<br />'));
       }
-	}
+    }
   };
 
   this.onRunComplete = function() {
