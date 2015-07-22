@@ -48,6 +48,24 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       }
     }
   };
+  
+  var createHtmlResults = function(browser) {
+	var suite;
+	var header;
+	var timestamp = (new Date()).toLocaleString();
+
+	suite = suites[browser.id] = body.ele('table', {cellspacing:'0', cellpadding:'0', border:'0'});
+	suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3', title:browser.fullName}, 'Browser: ' + browser.name);
+	suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3'}, 'Timestamp: ' + timestamp);
+	suites[browser.id]['results'] = suite.ele('tr').ele('td', {colspan:'3'});
+
+	header = suite.ele('tr', {class:'header'});
+	header.ele('td', {}, 'Status');
+	header.ele('td', {}, 'Spec');
+	header.ele('td', {}, 'Suite / Results');
+
+	body.ele('hr');
+  };
 
   this.adapters = [function(msg) {
     allMessages.push(msg);
@@ -61,36 +79,31 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
     htmlHelpers.createHead();
     htmlHelpers.createBody();
+	
+    if (!this.onBrowserStart) {
+      browsers.forEach(function(browser) {
+        createHtmlResults(browser);
+      });
+    }
   };
-
-  this.onBrowserStart = function (browser){
-    var suite;
-    var header;
-    
-    var timestamp = (new Date()).toLocaleString();
-
-    suite = suites[browser.id] = body.ele('table', {cellspacing:'0', cellpadding:'0', border:'0'});
-    suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3', title:browser.fullName}, 'Browser: ' + browser.name);
-    suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3'}, 'Timestamp: ' + timestamp);
-    suites[browser.id]['results'] = suite.ele('tr').ele('td', {colspan:'3'});
-		
-    header = suite.ele('tr', {class:'header'});
-    header.ele('td', {}, 'Status');
-    header.ele('td', {}, 'Spec');
-    header.ele('td', {}, 'Suite / Results');
-		
-    body.ele('hr');
-  };
+  
+  if (this.onBrowserStart) {
+    this.onBrowserStart = function (browser) {
+      createHtmlResults(browser);
+    };
+  }
 
   this.onBrowserComplete = function(browser) {
     var suite = suites[browser.id];
     var result = browser.lastResult;
 
-    suite['results'].txt(result.total + ' tests / ');
-    suite['results'].txt((result.disconnected || result.error ? 1 : 0) + ' errors / ');
-    suite['results'].txt(result.failed + ' failures / ');
-    suite['results'].txt(result.skipped + ' skipped / ');
-    suite['results'].txt('runtime: ' + ((result.netTime || 0) / 1000) + 's');
+    if (suite && suite['results']) {
+      suite['results'].txt(result.total + ' tests / ');
+      suite['results'].txt((result.disconnected || result.error ? 1 : 0) + ' errors / ');
+      suite['results'].txt(result.failed + ' failures / ');
+      suite['results'].txt(result.skipped + ' skipped / ');
+      suite['results'].txt('runtime: ' + ((result.netTime || 0) / 1000) + 's');
+	}
 
     if (allMessages.length > 0) {
         suite.ele('tr', {class:'system-out'}).ele('td', {colspan:'3'}).raw('<strong>System output:</strong><br />' + allMessages.join('<br />'));
