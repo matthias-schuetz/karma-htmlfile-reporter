@@ -27,6 +27,11 @@ You can simple do it by:
 npm install karma-htmlfile-reporter --save-dev
 ```
 
+It may also be necessary to install globally:
+```bash
+npm install -g karma-htmlfile-reporter
+```
+
 ## Configuration
 ```js
 // karma.conf.js
