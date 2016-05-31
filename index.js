@@ -66,6 +66,17 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
 	body.ele('hr');
   };
+  
+  var initializeHtmlForBrowser = function (browser) {
+    html = html = builder.create('html', null, 'html', { headless: true });
+	
+	html.doctype();
+
+    htmlHelpers.createHead();
+    htmlHelpers.createBody();
+	
+	createHtmlResults(browser);
+  };
 
   this.adapters = [function(msg) {
     allMessages.push(msg);
@@ -73,25 +84,13 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
   this.onRunStart = function(browsers) {
     suites = {};
-
-    html = builder.create('html', null, 'html', { headless: true });
-    html.doctype();
-
-    htmlHelpers.createHead();
-    htmlHelpers.createBody();
 	
-    if (!this.onBrowserStart) {
-      browsers.forEach(function(browser) {
-        createHtmlResults(browser);
-      });
-    }
+	browsers.forEach(initializeHtmlForBrowser)
   };
   
-  if (this.onBrowserStart) {
-    this.onBrowserStart = function (browser) {
-      createHtmlResults(browser);
-    };
-  }
+  this.onBrowserStart = function (browser) {
+    initializeHtmlForBrowser(browser)
+  };
 
   this.onBrowserComplete = function(browser) {
     var suite = suites[browser.id];
@@ -153,15 +152,14 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     }
   };
 
-  // TODO(vojta): move to onExit
   // wait for writing all the html files, before exiting
-  emitter.on('exit', function(done) {
+  this.onExit = function (done) {
     if (pendingFileWritings) {
       fileWritingFinished = done;
     } else {
       done();
     }
-  });
+  };
 };
 
 HTMLReporter.$inject = ['baseReporterDecorator', 'config', 'emitter', 'logger', 'helper', 'formatError'];
