@@ -8,16 +8,16 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   var pageTitle = config.htmlReporter.pageTitle || 'Unit Test Results';
   var subPageTitle = config.htmlReporter.subPageTitle || false;
   var log = logger.create('reporter.html');
- 
+
   var html;
   var body;
   var suites;
   var pendingFileWritings = 0;
   var fileWritingFinished = function() {};
   var allMessages = [];
-  
+
   baseReporterDecorator(this);
-  
+
   // TODO: remove if public version of this method is available
   var basePathResolve = function(relativePath) {
 
@@ -42,39 +42,44 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     createBody: function() {
       body = html.ele('body');
       body.ele('h1', {}, pageTitle);
-      
+
       if (subPageTitle) {
         body.ele('h2', {}, subPageTitle);
       }
     }
   };
-  
+
   var createHtmlResults = function(browser) {
     var suite;
-    var header;
+    var overview;
     var timestamp = (new Date()).toLocaleString();
 
-    suite = suites[browser.id] = body.ele('table', {cellspacing:'0', cellpadding:'0', border:'0'});
-    suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3', title:browser.fullName}, 'Browser: ' + browser.name);
-    suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3'}, 'Timestamp: ' + timestamp);
-    suites[browser.id]['results'] = suite.ele('tr').ele('td', {colspan:'3'});
+    suite = suites[browser.id] = body.ele('section', {});
+    overview = suite.ele('header', {class:'overview'});
 
-    header = suite.ele('tr', {class:'header'});
-    header.ele('td', {}, 'Status');
-    header.ele('td', {}, 'Spec');
-    header.ele('td', {}, 'Suite / Results');
+    // Assemble the Overview
+    overview.ele('div', {}, 'Browser: ' + browser.name);
+    overview.ele('div', {}, 'Timestamp: ' + timestamp);
 
-    body.ele('hr');
+    // Create paragraph tag for test stats to be placed in later
+    suites[browser.id]['results'] = overview.ele('p');
+
+    // header = suite.ele('tr', {class:'header'});
+    // header.ele('td', {}, 'Status');
+    // header.ele('td', {}, 'Spec');
+    // header.ele('td', {}, 'Suite / Results');
+
+    // body.ele('hr');
   };
-  
+
   var initializeHtmlForBrowser = function (browser) {
     html = html = builder.create('html', null, 'html', { headless: true });
-  
+
     html.doctype();
 
     htmlHelpers.createHead();
     htmlHelpers.createBody();
-  
+
     createHtmlResults(browser);
   };
 
@@ -84,11 +89,11 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
   this.onRunStart = function(browsers) {
     suites = {};
-    browsers.forEach(initializeHtmlForBrowser)
+    browsers.forEach(initializeHtmlForBrowser);
   };
-  
+
   this.onBrowserStart = function (browser) {
-    initializeHtmlForBrowser(browser)
+    initializeHtmlForBrowser(browser);
   };
 
   this.onBrowserComplete = function(browser) {
@@ -101,9 +106,9 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       suite['results'].txt(result.failed + ' failures / ');
       suite['results'].txt(result.skipped + ' skipped / ');
       suite['results'].txt('runtime: ' + ((result.netTime || 0) / 1000) + 's');
-    
+
       if (allMessages.length > 0) {
-        suite.ele('tr', {class:'system-out'}).ele('td', {colspan:'3'}).raw('<strong>System output:</strong><br />' + allMessages.join('<br />'));
+        suite.ele('div', {class:'system-out'}).raw('<strong>System output:</strong><br />' + allMessages.join('<br />'));
       }
     }
   };
@@ -116,7 +121,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     config.basePath = path.resolve(config.basePath || '.');
     outputFile = basePathResolve(outputFile);
     helper.normalizeWinPath(outputFile);
-  
+
     helper.mkdirIfNotExists(path.dirname(outputFile), function() {
       fs.writeFile(outputFile, htmlToOutput.end({pretty: true}), function(err) {
         if (err) {
@@ -137,16 +142,27 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
   this.specSuccess = this.specSkipped = this.specFailure = function(browser, result) {
     var specClass = result.skipped ? 'skip' : (result.success ? 'pass' : 'fail');
-    var spec = suites[browser.id].ele('tr', {class:specClass});
+    var spec = suites[browser.id].ele('div', {class: 'spec ' + specClass});
     var suiteColumn;
 
-    spec.ele('td', {}, result.skipped ? 'Skipped' : (result.success ? ('Passed in ' + ((result.time || 0) / 1000) + 's') : 'Failed'));
-    spec.ele('td', {}, result.description);
-    suiteColumn = spec.ele('td', {}).raw(result.suite.join(' &raquo; '));
+    // Display test result as a h4
+    spec.ele('h4', {}, result.skipped ? 'Skipped' : (result.success ? ('Passed in ' + ((result.time || 0) / 1000) + 's') : 'Failed'));
+
+    // Assemble the test description
+    var specDescription = spec.ele('p');
+    specDescription.ele('em', {}, result.suite);
+    specDescription.txt(result.description);
+
+    // Error Message
+    suiteColumn = spec.ele('p', {});// .raw(result.suite.join(' &raquo; '));
 
     if (!result.success) {
       result.log.forEach(function(err) {
-        suiteColumn.raw('<br />' + formatError(err).replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+        // suiteColumn.raw('<p>' + result.suite + '<p>');
+        suiteColumn.raw('<p>' + err.replace(/(?:\r\n|\r|\n)/g, '<br />') + '<p>');
+
+
+        //:P suiteColumn.raw('<br />' + formatError(err).replace(/</g,'&lt;').replace(/>/g,'&gt;'));
       });
     }
   };
