@@ -42,7 +42,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     createBody: function() {
       body = html.ele('body');
       body.ele('h1', {}, pageTitle);
-			
+      
       if (subPageTitle) {
         body.ele('h2', {}, subPageTitle);
       }
@@ -50,32 +50,32 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   };
   
   var createHtmlResults = function(browser) {
-	var suite;
-	var header;
-	var timestamp = (new Date()).toLocaleString();
+    var suite;
+    var header;
+    var timestamp = (new Date()).toLocaleString();
 
-	suite = suites[browser.id] = body.ele('table', {cellspacing:'0', cellpadding:'0', border:'0'});
-	suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3', title:browser.fullName}, 'Browser: ' + browser.name);
-	suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3'}, 'Timestamp: ' + timestamp);
-	suites[browser.id]['results'] = suite.ele('tr').ele('td', {colspan:'3'});
+    suite = suites[browser.id] = body.ele('table', {cellspacing:'0', cellpadding:'0', border:'0'});
+    suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3', title:browser.fullName}, 'Browser: ' + browser.name);
+    suite.ele('tr', {class:'overview'}).ele('td', {colspan:'3'}, 'Timestamp: ' + timestamp);
+    suites[browser.id]['results'] = suite.ele('tr').ele('td', {colspan:'3'});
 
-	header = suite.ele('tr', {class:'header'});
-	header.ele('td', {}, 'Status');
-	header.ele('td', {}, 'Spec');
-	header.ele('td', {}, 'Suite / Results');
+    header = suite.ele('tr', {class:'header'});
+    header.ele('td', {}, 'Status');
+    header.ele('td', {}, 'Spec');
+    header.ele('td', {}, 'Suite / Results');
 
-	body.ele('hr');
+    body.ele('hr');
   };
   
   var initializeHtmlForBrowser = function (browser) {
     html = html = builder.create('html', null, 'html', { headless: true });
-	
-	html.doctype();
+  
+    html.doctype();
 
     htmlHelpers.createHead();
     htmlHelpers.createBody();
-	
-	createHtmlResults(browser);
+  
+    createHtmlResults(browser);
   };
 
   this.adapters = [function(msg) {
@@ -84,8 +84,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
   this.onRunStart = function(browsers) {
     suites = {};
-	
-	browsers.forEach(initializeHtmlForBrowser)
+    browsers.forEach(initializeHtmlForBrowser)
   };
   
   this.onBrowserStart = function (browser) {
@@ -102,7 +101,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       suite['results'].txt(result.failed + ' failures / ');
       suite['results'].txt(result.skipped + ' skipped / ');
       suite['results'].txt('runtime: ' + ((result.netTime || 0) / 1000) + 's');
-	  
+    
       if (allMessages.length > 0) {
         suite.ele('tr', {class:'system-out'}).ele('td', {colspan:'3'}).raw('<strong>System output:</strong><br />' + allMessages.join('<br />'));
       }
@@ -117,7 +116,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     config.basePath = path.resolve(config.basePath || '.');
     outputFile = basePathResolve(outputFile);
     helper.normalizeWinPath(outputFile);
-	
+  
     helper.mkdirIfNotExists(path.dirname(outputFile), function() {
       fs.writeFile(outputFile, htmlToOutput.end({pretty: true}), function(err) {
         if (err) {
@@ -166,5 +165,5 @@ HTMLReporter.$inject = ['baseReporterDecorator', 'config', 'emitter', 'logger', 
 
 // PUBLISH DI MODULE
 module.exports = {
-	'reporter:html': ['type', HTMLReporter]
+  'reporter:html': ['type', HTMLReporter]
 };
