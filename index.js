@@ -58,18 +58,11 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     overview = suite.ele('header', {class:'overview'});
 
     // Assemble the Overview
-    overview.ele('div', {}, 'Browser: ' + browser.name);
-    overview.ele('div', {}, 'Timestamp: ' + timestamp);
+    overview.ele('div', {class:'browser'}, 'Browser: ' + browser.name);
+    overview.ele('div', {class:'timestamp'}, 'Timestamp: ' + timestamp);
 
-    // Create paragraph tag for test stats to be placed in later
-    suites[browser.id]['results'] = overview.ele('p');
-
-    // header = suite.ele('tr', {class:'header'});
-    // header.ele('td', {}, 'Status');
-    // header.ele('td', {}, 'Spec');
-    // header.ele('td', {}, 'Suite / Results');
-
-    // body.ele('hr');
+    // Create paragraph tag for test results to be placed in later
+    suites[browser.id]['results'] = overview.ele('p', {class:'results'});
   };
 
   var initializeHtmlForBrowser = function (browser) {
@@ -142,27 +135,23 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
   this.specSuccess = this.specSkipped = this.specFailure = function(browser, result) {
     var specClass = result.skipped ? 'skip' : (result.success ? 'pass' : 'fail');
-    var spec = suites[browser.id].ele('div', {class: 'spec ' + specClass});
+    var spec = suites[browser.id].ele('div', {class: 'spec spec--' + specClass});
     var suiteColumn;
 
     // Display test result as a h4
-    spec.ele('h4', {}, result.skipped ? 'Skipped' : (result.success ? ('Passed in ' + ((result.time || 0) / 1000) + 's') : 'Failed'));
+    spec.ele('h3', {class:'spec__status'}, result.skipped ? 'Skipped' : (result.success ? ('Passed in ' + ((result.time || 0) / 1000) + 's') : 'Failed'));
 
     // Assemble the test description
-    var specDescription = spec.ele('p');
-    specDescription.ele('em', {}, result.suite);
+    var specDescription = spec.ele('p', {class:'spec__descrip'});
+    specDescription.ele('em', {class:'spec__suite'}, result.suite);
     specDescription.txt(result.description);
 
     // Error Message
-    suiteColumn = spec.ele('p', {});// .raw(result.suite.join(' &raquo; '));
+    suiteColumn = spec.ele('p', {class:'spec__log'});// .raw(result.suite.join(' &raquo; '));
 
     if (!result.success) {
       result.log.forEach(function(err) {
-        // suiteColumn.raw('<p>' + result.suite + '<p>');
-        suiteColumn.raw('<p>' + err.replace(/(?:\r\n|\r|\n)/g, '<br />') + '<p>');
-
-
-        //:P suiteColumn.raw('<br />' + formatError(err).replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+        suiteColumn.raw('<br />' + formatError(err).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/(?:\r\n|\r|\n)/g, '<br />'));
       });
     }
   };
