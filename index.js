@@ -37,7 +37,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       var head = html.ele('head');
       head.ele('meta', {charset: 'utf-8'});
       head.ele('title', {}, pageTitle + (subPageTitle ? ' - ' + subPageTitle : ''));
-      head.ele('style', {type: 'text/css'}, 'html,body{font-family:Arial,sans-serif;margin:0;padding:0;}body{padding:10px 40px;}h1{margin-bottom:0;}h2{margin-top:0;color:#999;}table{width:100%;margin-top:20px;margin-bottom:20px;table-layout:fixed;}tr.header{background:#ddd;font-weight:bold;border-bottom:none;}td{padding:7px;border-top:none;border-left:1px black solid;border-bottom:1px black solid;border-right:none;word-break:break-all;word-wrap:break-word;}tr.pass td{color:#003b07;background:#86e191;}tr.skip td{color:#7d3a00;background:#ffd24a;}tr.fail td{color:#5e0e00;background:#ff9c8a;}tr:first-child td{border-top:1px black solid;}td:last-child{border-right:1px black solid;}tr.overview{font-weight:bold;color:#777;}tr.overview td{padding-bottom:0px;border-bottom:none;}tr.system-out td{color:#777;}hr{height:2px;margin:30px 0;background:#000;border:none;}');
+      head.ele('style', {type: 'text/css'}, 'html,body{font-family:Arial,sans-serif;margin:0;padding:0;}body{padding:10px 40px;}h3{margin:6px 0;}.overview{color:#333;font-weight:bold;}.system-out{margin:0.4rem 0;}.spec{padding:0.8rem;margin:0.3rem 0;}.spec--pass{color:#3c763d;background-color:#dff0d8;border:1px solid #d6e9c6;}.spec--skip{color:#8a6d3b;background-color:#fcf8e3;border:1px solid #faebcc;}.spec--fail{color:#a94442;background-color:#f2dede;border:1px solid #ebccd1;}.spec__title{display:inline;}.spec__suite{display:inline;}.spec__descrip{font-weight:normal;}.spec__status{float:right;}.spec__log{padding-left: 2.3rem;}');
     },
     createBody: function() {
       body = html.ele('body');
@@ -63,6 +63,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
     // Create paragraph tag for test results to be placed in later
     suites[browser.id]['results'] = overview.ele('p', {class:'results'});
+
   };
 
   var initializeHtmlForBrowser = function (browser) {
@@ -136,22 +137,25 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   this.specSuccess = this.specSkipped = this.specFailure = function(browser, result) {
     var specClass = result.skipped ? 'skip' : (result.success ? 'pass' : 'fail');
     var spec = suites[browser.id].ele('div', {class: 'spec spec--' + specClass});
-    var suiteColumn;
 
-    // Display test result as a h4
-    spec.ele('h3', {class:'spec__status'}, result.skipped ? 'Skipped' : (result.success ? ('Passed in ' + ((result.time || 0) / 1000) + 's') : 'Failed'));
+    // Create spec header
+    var specHeader = spec.ele('h3', {class:'spec__header'});
 
-    // Assemble the test description
-    var specDescription = spec.ele('p', {class:'spec__descrip'});
-    specDescription.ele('em', {class:'spec__suite'}, result.suite);
-    specDescription.txt(result.description);
+    // Assemble the spec title
+    var specTitle = specHeader.ele('div', {class:'spec__title'});
+    specTitle.ele('p', {class:'spec__suite'}, result.suite);
+    specTitle.ele('em',  {class:'spec__descrip'}, result.description);
 
-    // Error Message
-    suiteColumn = spec.ele('p', {class:'spec__log'});// .raw(result.suite.join(' &raquo; '));
+    // Display spec result
+    specHeader.ele('div', {class:'spec__status'}, result.skipped ? 'Skipped' : (result.success ? ('Passed in ' + ((result.time || 0) / 1000) + 's') : 'Failed'));
 
     if (!result.success) {
-      result.log.forEach(function(err) {
-        suiteColumn.raw('<br />' + formatError(err).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/(?:\r\n|\r|\n)/g, '<br />'));
+      // Error Messages
+      var suiteColumn = spec.ele('p', {class:'spec__log'});// .raw(result.suite.join(' &raquo; '));
+      result.log.forEach(function(err, index) {
+        var message = (index === 0) ? '' : '<br />';
+        message += formatError(err).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/(?:\r\n|\r|\n)/g, '<br />');
+        suiteColumn.raw(message);
       });
     }
   };
