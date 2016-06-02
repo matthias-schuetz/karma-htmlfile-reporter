@@ -1,6 +1,6 @@
 {
   "name": "karma-htmlfile-reporter",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "A Karma plugin. Report results in styled html format.",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,9 @@
     "name": "Matthias Schuetz",
     "email": "MatthiasSchuetz@gmx.de"
   },
+  "contributors": [
+    "David G Chung <davidc4747@yahoo.com>"
+  ],
   "dependencies": {
     "xmlbuilder": "3.1.0"
   },
@@ -31,6 +34,5 @@
     "grunt-npm": "~0.0.2",
     "grunt-bump": "~0.0.7",
     "grunt-auto-release": "~0.0.2"
-  },
-  "contributors": []
+  }
 }
