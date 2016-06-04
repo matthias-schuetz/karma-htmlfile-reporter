@@ -13,6 +13,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   var html;
   var body;
   var suites;
+  var htmlCreated = false;
   var pendingFileWritings = 0;
   var fileWritingFinished = function() {};
   var allMessages = [];
@@ -53,7 +54,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   var createHtmlResults = function(browser) {
     var suite;
     var header;
-	var overview;
+    var overview;
     var timestamp = (new Date()).toLocaleString();
 
     if (useLegacyStyle) {
@@ -80,8 +81,19 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       suites[browser.id]['results'] = overview.ele('p', {class:'results'});
     }
   };
-  
-  var initializeHtmlForBrowser = function(browser) {  
+
+  var initializeHtmlForBrowser = function(browser) {
+    if (!htmlCreated) {
+      html = builder.create('html', null, 'html', { headless: true });
+
+      html.doctype();
+
+      htmlHelpers.createHead();
+      htmlHelpers.createBody();
+
+      htmlCreated = true;
+    }
+      
     createHtmlResults(browser);
   };
 
@@ -91,14 +103,6 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
   this.onRunStart = function(browsers) {
     suites = {};
-	
-	html = builder.create('html', null, 'html', { headless: true });
-
-    html.doctype();
-
-    htmlHelpers.createHead();
-    htmlHelpers.createBody();
-	
     browsers.forEach(initializeHtmlForBrowser);
   };
   
@@ -125,7 +129,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
         }
 
         allMessages = [];
-	  }
+      }
     }
   };
 
@@ -158,7 +162,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
   this.specSuccess = this.specSkipped = this.specFailure = function(browser, result) {
     var specClass = result.skipped ? 'skip' : (result.success ? 'pass' : 'fail');
-	var specStatus = result.skipped ? 'Skipped' : (result.success ? ('Passed in ' + ((result.time || 0) / 1000) + 's') : 'Failed');
+    var specStatus = result.skipped ? 'Skipped' : (result.success ? ('Passed in ' + ((result.time || 0) / 1000) + 's') : 'Failed');
     var spec;
     var specHeader;
     var specTitle;
@@ -185,7 +189,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     }
 
     if (!result.success) {
-		if (useLegacyStyle) {
+        if (useLegacyStyle) {
           result.log.forEach(function(err) {
             suiteColumn.raw('<br />' + formatError(err).replace(/</g,'&lt;').replace(/>/g,'&gt;'));
           });
