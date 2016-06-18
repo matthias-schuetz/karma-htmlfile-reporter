@@ -93,8 +93,6 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
       htmlCreated = true;
     }
-      
-    createHtmlResults(browser);
   };
 
   this.adapters = [function(msg) {
@@ -108,6 +106,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   
   this.onBrowserStart = function (browser) {
     initializeHtmlForBrowser(browser);
+    createHtmlResults(browser);
   };
 
   this.onBrowserComplete = function(browser) {
@@ -158,6 +157,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 
     suites = html = null;
     allMessages.length = 0;
+    htmlCreated = false;
   };
 
   this.specSuccess = this.specSkipped = this.specFailure = function(browser, result) {
