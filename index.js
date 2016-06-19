@@ -17,6 +17,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   var pendingFileWritings = 0;
   var fileWritingFinished = function() {};
   var allMessages = [];
+  var allErrors = [];
   
   baseReporterDecorator(this);
   
@@ -39,7 +40,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       var head = html.ele('head');
       head.ele('meta', {charset: 'utf-8'});
       head.ele('title', {}, pageTitle + (subPageTitle ? ' - ' + subPageTitle : ''));
-      head.ele('style', {type: 'text/css'}, 'html,body{font-family:Arial,sans-serif;margin:0;padding:0;}body{padding:10px 40px;}h1{margin-bottom:0;}h2{margin-top:0;margin-bottom:0;color:#999;}table{width:100%;margin-top:20px;margin-bottom:20px;table-layout:fixed;}tr.header{background:#ddd;font-weight:bold;border-bottom:none;}td{padding:7px;border-top:none;border-left:1px black solid;border-bottom:1px black solid;border-right:none;word-break:break-all;word-wrap:break-word;}tr.pass td{color:#003b07;background:#86e191;}tr.skip td{color:#7d3a00;background:#ffd24a;}tr.fail td{color:#5e0e00;background:#ff9c8a;}tr:first-child td{border-top:1px black solid;}td:last-child{border-right:1px black solid;}tr.overview{font-weight:bold;color:#777;}tr.overview td{padding-bottom:0px;border-bottom:none;}tr.system-out td{color:#777;}hr{height:2px;margin:30px 0;background:#000;border:none;}section{margin-top:40px;}h3{margin:6px 0;}.overview{color:#333;font-weight:bold;}.system-out{margin:0.4rem 0;}.spec{padding:0.8rem;margin:0.3rem 0;}.spec--pass{color:#3c763d;background-color:#dff0d8;border:1px solid #d6e9c6;}.spec--skip{color:#8a6d3b;background-color:#fcf8e3;border:1px solid #faebcc;}.spec--fail{color:#a94442;background-color:#f2dede;border:1px solid #ebccd1;}.spec__title{display:inline;}.spec__suite{display:inline;}.spec__descrip{font-weight:normal;}.spec__status{float:right;}.spec__log{padding-left: 2.3rem;}');
+      head.ele('style', {type: 'text/css'}, 'html,body{font-family:Arial,sans-serif;margin:0;padding:0;}body{padding:10px 40px;}h1{margin-bottom:0;}h2{margin-top:0;margin-bottom:0;color:#999;}table{width:100%;margin-top:20px;margin-bottom:20px;table-layout:fixed;}tr.header{background:#ddd;font-weight:bold;border-bottom:none;}td{padding:7px;border-top:none;border-left:1px black solid;border-bottom:1px black solid;border-right:none;word-break:break-all;word-wrap:break-word;}tr.pass td{color:#003b07;background:#86e191;}tr.skip td{color:#7d3a00;background:#ffd24a;}tr.fail td{color:#5e0e00;background:#ff9c8a;}tr:first-child td{border-top:1px black solid;}td:last-child{border-right:1px black solid;}tr.overview{font-weight:bold;color:#777;}tr.overview td{padding-bottom:0px;border-bottom:none;}tr.system-out td{color:#777;}tr.system-errors td{color:#f00;}hr{height:2px;margin:30px 0;background:#000;border:none;}section{margin-top:40px;}h3{margin:6px 0;}.overview{color:#333;font-weight:bold;}.system-out{margin:0.4rem 0;}.system-errors{color:#a94442}.spec{padding:0.8rem;margin:0.3rem 0;}.spec--pass{color:#3c763d;background-color:#dff0d8;border:1px solid #d6e9c6;}.spec--skip{color:#8a6d3b;background-color:#fcf8e3;border:1px solid #faebcc;}.spec--fail{color:#a94442;background-color:#f2dede;border:1px solid #ebccd1;}.spec__title{display:inline;}.spec__suite{display:inline;}.spec__descrip{font-weight:normal;}.spec__status{float:right;}.spec__log{padding-left: 2.3rem;}');
     },
     createBody: function() {
       body = html.ele('body');
@@ -103,10 +104,16 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     suites = {};
     browsers.forEach(initializeHtmlForBrowser);
   };
-  
-  this.onBrowserStart = function (browser) {
+
+  this.onBrowserStart = function(browser) {
     initializeHtmlForBrowser(browser);
     createHtmlResults(browser);
+  };
+
+  this.onBrowserError = function(browser, error) {
+    initializeHtmlForBrowser(browser);
+    createHtmlResults(browser);
+	allErrors.push(formatError(error));
   };
 
   this.onBrowserComplete = function(browser) {
@@ -128,35 +135,50 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
         }
 
         allMessages = [];
+      }    
+
+      if (allErrors.length > 0) {
+        if (useLegacyStyle) {
+          suite.ele('tr', {class:'system-errors'}).ele('td', {colspan:'3'}).raw('<strong>Errors:</strong><br />' + allErrors.join('<br />'));
+        } else {
+          suite.ele('div', {class:'system-errors'}).raw('<strong>Errors:</strong><br />' + allErrors.join('<br />'));
+        }
+
+        allErrors = [];
       }
     }
   };
 
-  this.onRunComplete = function() {
+  this.onRunComplete = function(browsers) {
     var htmlToOutput = html;
 
-    pendingFileWritings++;
+    if (htmlToOutput) {
+      pendingFileWritings++;
 
-    config.basePath = path.resolve(config.basePath || '.');
-    outputFile = basePathResolve(outputFile);
-    helper.normalizeWinPath(outputFile);
-  
-    helper.mkdirIfNotExists(path.dirname(outputFile), function() {
-      fs.writeFile(outputFile, htmlToOutput.end({pretty: true}), function(err) {
-        if (err) {
-          log.warn('Cannot write HTML report\n\t' + err.message);
-        } else {
-          log.debug('HTML results written to "%s".', outputFile);
-        }
+      config.basePath = path.resolve(config.basePath || '.');
+      outputFile = basePathResolve(outputFile);
+      helper.normalizeWinPath(outputFile);
 
-        if (!--pendingFileWritings) {
-          fileWritingFinished();
-        }
+      helper.mkdirIfNotExists(path.dirname(outputFile), function() {
+        fs.writeFile(outputFile, htmlToOutput.end({pretty: true}), function(err) {
+          if (err) {
+            log.warn('Cannot write HTML report\n\t' + err.message);
+          } else {
+            log.debug('HTML results written to "%s".', outputFile);
+          }
+
+          if (!--pendingFileWritings) {
+            fileWritingFinished();
+          }
+        });
       });
-    });
+    } else {
+      log.error('HTML report was not created\n\t');
+    }
 
     suites = html = null;
     allMessages.length = 0;
+    allErrors.length = 0;
     htmlCreated = false;
   };
 
