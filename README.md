@@ -8,7 +8,7 @@ This is a plugin for the [Karma Test Runner]. By adding this reporter to your ka
 <img src="http://matthias-schuetz.github.io/karma-htmlfile-reporter/karma-htmlfile-reporter.png?2" />
 
 ## HTML test result page
-Version 0.3 comes with a fresh style from [David G Chung](https://github.com/davidc4747). You can see a preview of the exported unit test result page [here](http://matthias-schuetz.github.io/karma-htmlfile-reporter/units.html). The legacy page style is online [here](http://matthias-schuetz.github.io/karma-htmlfile-reporter/units_legacy.html). If you want to use the legacy style, you can set the option *useLegacyStyle* to *true*.
+Version 0.3 comes with a fresh style from [David G Chung](https://github.com/davidc4747). You can see a preview of the exported unit test result page [here](http://matthias-schuetz.github.io/karma-htmlfile-reporter/units.html). A new option called *groupSuites* will group separate suites (*describe* blocks in test files) visually, see an example output [here](http://matthias-schuetz.github.io/karma-htmlfile-reporter/units_groups.html). You can also set the option *useCompactStyle* to *true* to export a more compact HTML output. The legacy page style is online [here](http://matthias-schuetz.github.io/karma-htmlfile-reporter/units_legacy.html). If you want to use the legacy style, you can set the option *useLegacyStyle* to *true*.
 
 ## Installation
 
@@ -45,6 +45,8 @@ module.exports = function(config) {
       // Optional
       pageTitle: 'Unit Tests',
       subPageTitle: 'A sample project description',
+	  groupSuites: true,
+	  useCompactStyle: true,
       useLegacyStyle: true
     }
   });
