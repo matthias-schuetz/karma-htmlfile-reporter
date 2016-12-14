@@ -11,7 +11,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   var useLegacyStyle = config.htmlReporter.useLegacyStyle || false;
   var useCompactStyle = config.htmlReporter.useCompactStyle || false;
   var log = logger.create('reporter.html');
- 
+
   var html;
   var body;
   var suites;
@@ -21,9 +21,9 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   var fileWritingFinished = function() {};
   var allMessages = [];
   var allErrors = [];
-  
+
   baseReporterDecorator(this);
-  
+
   // TODO: remove if public version of this method is available
   var basePathResolve = function(relativePath) {
 
@@ -48,13 +48,13 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     createBody: function() {
       body = html.ele('body', {class:useCompactStyle ? 'compact' : ''});
       body.ele('h1', {}, pageTitle);
-      
+
       if (subPageTitle) {
         body.ele('h2', {}, subPageTitle);
       }
     }
   };
-  
+
   var createHtmlResults = function(browser) {
     var suite;
     var header;
@@ -129,7 +129,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       suite['results'].txt(result.failed + ' failures / ');
       suite['results'].txt(result.skipped + ' skipped / ');
       suite['results'].txt('runtime: ' + ((result.netTime || 0) / 1000) + 's');
-    
+
       if (allMessages.length > 0) {
         if (useLegacyStyle) {
           suite.ele('tr', {class:'system-out'}).ele('td', {colspan:'3'}).raw('<strong>System output:</strong><br />' + allMessages.join('<br />'));
@@ -138,7 +138,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
         }
 
         allMessages = [];
-      }    
+      }
 
       if (allErrors.length > 0) {
         if (useLegacyStyle) {
@@ -150,6 +150,8 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
         allErrors = [];
       }
     }
+
+    suites[browser.id] = null;
   };
 
   this.onRunComplete = function(browsers) {
@@ -179,7 +181,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       log.error('HTML report was not created\n\t');
     }
 
-    suites = html = null;
+    html = null;
     allMessages.length = 0;
     allErrors.length = 0;
     htmlCreated = false;
@@ -197,7 +199,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     var specHeader;
     var specTitle;
     var suiteColumn;
-	
+
     if (lastSuiteName !== currentSuiteName) {
       isNewSuite = true;
       lastSuiteName = currentSuiteName;
