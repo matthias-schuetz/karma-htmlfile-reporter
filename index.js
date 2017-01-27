@@ -165,6 +165,13 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
       helper.normalizeWinPath(outputFile);
 
       helper.mkdirIfNotExists(path.dirname(outputFile), function() {
+        if(!htmlToOutput) {
+          log.warn('Cannot write HTML report\n\t No output!');
+          if (!--pendingFileWritings) {
+            fileWritingFinished();
+          }
+          return;
+        }
         fs.writeFile(outputFile, htmlToOutput.end({pretty: true}), function(err) {
           if (err) {
             log.warn('Cannot write HTML report\n\t' + err.message);
