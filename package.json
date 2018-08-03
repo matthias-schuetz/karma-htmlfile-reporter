@@ -1,6 +1,6 @@
 {
   "name": "karma-htmlfile-reporter",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "A Karma plugin. Report results in styled html format.",
   "main": "index.js",
   "scripts": {
@@ -20,19 +20,20 @@
     "email": "MatthiasSchuetz@gmx.de"
   },
   "contributors": [
-    "David G Chung <davidc4747@yahoo.com>"
+    "David G Chung <davidc4747@yahoo.com>",
+    "Nader Eoshaiker https://github.com/nader-eloshaiker"
   ],
   "dependencies": {
-    "xmlbuilder": "3.1.0"
+    "xmlbuilder": "^10.0.0"
   },
   "peerDependencies": {
     "karma": ">=0.10"
   },
   "license": "MIT",
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-npm": "~0.0.2",
-    "grunt-bump": "~0.0.7",
-    "grunt-auto-release": "~0.0.2"
+    "grunt": "^1.0.3",
+    "grunt-auto-release": "~0.0.7",
+    "grunt-bump": "^0.8.0",
+    "grunt-npm": "~0.0.2"
   }
 }
