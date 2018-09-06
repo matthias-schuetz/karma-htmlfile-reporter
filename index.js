@@ -21,6 +21,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   var fileWritingFinished = function() {};
   var allMessages = [];
   var allErrors = [];
+  var self = this;
 
   baseReporterDecorator(this);
 
@@ -60,6 +61,10 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
     var header;
     var overview;
     var timestamp = (new Date()).toLocaleString();
+	  
+    if (!suites) {
+      self.onRunStart(browser);
+    }
 
     if (useLegacyStyle) {
       suite = suites[browser.id] = body.ele('table', {cellspacing:'0', cellpadding:'0', border:'0'});
