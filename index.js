@@ -10,6 +10,7 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
   var groupSuites = config.htmlReporter.groupSuites || false;
   var useLegacyStyle = config.htmlReporter.useLegacyStyle || false;
   var useCompactStyle = config.htmlReporter.useCompactStyle || false;
+  var showOnlyFailed = config.htmlReporter.showOnlyFailed || false;  
   var log = logger.create('reporter.html');
 
   var html;
@@ -221,30 +222,32 @@ var HTMLReporter = function(baseReporterDecorator, config, emitter, logger, help
 	  suiteName.shift();
     }
 
-    if (useLegacyStyle) {
-      spec = suites[browser.id].ele('tr', {class:specClass});
-      spec.ele('td', {}, specStatus);
-      spec.ele('td', {}, result.description);
-      suiteColumn = spec.ele('td', {}).raw(currentSuite.join(' &raquo; '));
-    } else {
-      if (groupSuites && isNewSuite) {
-        specGroup = suites[browser.id].ele('div', {class: 'spec spec--group'});
-        specGroup.ele('h3', {class:'spec__header'}).raw(currentSuiteName);
+	if (!showOnlyFailed || (showOnlyFailed && !result.success)) {
+      if (useLegacyStyle) {
+        spec = suites[browser.id].ele('tr', {class:specClass});
+        spec.ele('td', {}, specStatus);
+        spec.ele('td', {}, result.description);
+        suiteColumn = spec.ele('td', {}).raw(currentSuite.join(' &raquo; '));
+      } else {
+        if (groupSuites && isNewSuite) {
+          specGroup = suites[browser.id].ele('div', {class: 'spec spec--group'});
+          specGroup.ele('h3', {class:'spec__header'}).raw(currentSuiteName);
+        }
+
+        spec = suites[browser.id].ele('div', {class: 'spec spec--' + specClass, style: (groupSuites ? ('margin-left:' + ((currentSuite.length - 1) * 20) + 'px;') : '')});
+
+        // Create spec header
+        specHeader = spec.ele('h3', {class:'spec__header'});
+
+        // Assemble the spec title
+        specTitle = specHeader.ele('div', {class:'spec__title'});
+        specTitle.ele('p', {class:'spec__suite' + (groupSuites ? ((suiteName[0] !== currentSuiteName || suiteName.length > 1) ? '' : ' hidden') : '')}).raw(suiteName.join(' &raquo; '));
+
+        specTitle.ele('em',  {class:'spec__descrip'}, result.description);
+
+        // Display spec result
+        specHeader.ele('div', {class:'spec__status'}, specStatus);
       }
-
-      spec = suites[browser.id].ele('div', {class: 'spec spec--' + specClass, style: (groupSuites ? ('margin-left:' + ((currentSuite.length - 1) * 20) + 'px;') : '')});
-
-      // Create spec header
-      specHeader = spec.ele('h3', {class:'spec__header'});
-
-      // Assemble the spec title
-      specTitle = specHeader.ele('div', {class:'spec__title'});
-      specTitle.ele('p', {class:'spec__suite' + (groupSuites ? ((suiteName[0] !== currentSuiteName || suiteName.length > 1) ? '' : ' hidden') : '')}).raw(suiteName.join(' &raquo; '));
-
-      specTitle.ele('em',  {class:'spec__descrip'}, result.description);
-
-      // Display spec result
-      specHeader.ele('div', {class:'spec__status'}, specStatus);
     }
 
     if (!result.success) {
