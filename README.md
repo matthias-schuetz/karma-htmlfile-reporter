@@ -45,8 +45,8 @@ module.exports = function(config) {
       // Optional
       pageTitle: 'Unit Tests',
       subPageTitle: 'A sample project description',
-	  groupSuites: true,
-	  useCompactStyle: true,
+      groupSuites: true,
+      useCompactStyle: true,
       useLegacyStyle: true,
       showOnlyFailed: false
     }
